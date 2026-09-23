@@ -138,9 +138,15 @@ granted to a second principal of any kind. Share records existing alongside
 that pattern indicate a sharing path implemented outside the permission
 system, which a permissions audit would not see.
 
-This check does not determine whether opening a share link requires
-authentication, nor whether share identifiers are guessable. Both are worth
-testing directly on your own deployment.
+"Public" in `share_records_public` refers to the flag stored on the share
+record, not to internet reachability. On the reference deployment, opening a
+share URL while unauthenticated redirects to login, so shares are public
+within the authenticated user base rather than to anonymous visitors. This is
+a property of the fork's routing, not of the data, so test it on your own
+deployment before interpreting the figure: open a share URL for an agent that
+still exists in a private browser window and record whether it renders.
+
+Whether share identifiers are guessable is not assessed here.
 
 ## Audit coverage
 
