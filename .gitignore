@@ -1,0 +1,14 @@
+# never commit connection details or raw output
+.env
+*.env
+recon_out.json
+policy_out.json
+verify_out.json
+submission.json
+*_err.txt
+
+# local
+.DS_Store
+node_modules/
+__pycache__/
+*.pyc

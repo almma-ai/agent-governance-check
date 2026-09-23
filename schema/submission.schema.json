@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Lucas-almma/agent-governance-check/schema/submission.schema.json",
+  "title": "Agent governance check submission",
+  "description": "Aggregate output of agent_governance_check.js. Counts only; contains no user or agent identifiers.",
+  "type": "object",
+  "required": ["schema_version", "snapshot_utc", "deployment", "scale", "audit_coverage", "cuts"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "snapshot_utc": { "type": "string", "format": "date-time" },
+    "deployment": {
+      "type": "object",
+      "required": ["label", "kind"],
+      "properties": {
+        "label": { "type": "string", "description": "Free label, e.g. anon-1" },
+        "kind": { "enum": ["enterprise", "team", "hobby", "public", null] },
+        "librechat_version": { "type": ["string", "null"] },
+        "is_fork": { "type": ["boolean", "null"] }
+      }
+    },
+    "collections_present": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    },
+    "scale": {
+      "type": "object",
+      "properties": {
+        "users": { "type": ["integer", "null"] },
+        "agents": { "type": "integer" },
+        "agent_authors": { "type": "integer" },
+        "conversations": { "type": ["integer", "null"] },
+        "conversations_via_agent": { "type": ["integer", "null"] }
+      }
+    },
+    "audit_coverage": {
+      "type": "object",
+      "description": "Lifecycle events that occurred, against records retained of them.",
+      "properties": {
+        "audit_documents": { "type": ["integer", "null"] },
+        "agents_created": { "type": "integer" },
+        "agents_revised": { "type": ["integer", "null"] },
+        "share_events": { "type": ["integer", "null"] },
+        "api_keys_issued": { "type": ["integer", "null"] },
+        "api_keys_used": { "type": ["integer", "null"] }
+      }
+    },
+    "deleted_agents": {
+      "type": "object",
+      "properties": {
+        "agents_deleted": { "type": "integer" },
+        "conversations_on_deleted_agents": { "type": "integer" },
+        "pct_traffic_unreviewable": { "type": "number" }
+      }
+    },
+    "cuts": {
+      "type": "object",
+      "required": ["all_agents", "used_at_least_once", "used_5_or_more"],
+      "additionalProperties": { "$ref": "#/$defs/cut" }
+    },
+    "sharing": { "type": "object" },
+    "capability_surface": { "type": "object" }
+  },
+  "$defs": {
+    "cut": {
+      "type": "object",
+      "required": ["agents", "hard_fail_agents", "hard_fail_pct", "checks"],
+      "properties": {
+        "agents": { "type": "integer" },
+        "conversations": { "type": "integer" },
+        "hard_fail_agents": { "type": "integer" },
+        "hard_fail_conversations": { "type": "integer" },
+        "hard_fail_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "checks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["agents", "conversations"],
+            "properties": {
+              "agents": { "type": "integer" },
+              "conversations": { "type": "integer" }
+            }
+          }
+        },
+        "fail_count_distribution": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
