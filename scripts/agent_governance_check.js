@@ -189,9 +189,16 @@ out.cuts = {
 out.sharing = {
   acl_agent_grants_total: has("aclentries")
     ? db.aclentries.countDocuments({ resourceType: "agent" }) : null,
-  acl_agent_grants_nonowner: has("aclentries")
-    ? db.aclentries.countDocuments({ resourceType: "agent", principalType: { $ne: "user" } }) : null,
-  share_records: has("sharedagents") ? db.sharedagents.countDocuments() : null,
+  acl_agents_with_multiple_grants: has("aclentries")
+    ? db.aclentries.aggregate([
+        { $match: { resourceType: "agent" } },
+        { $group: { _id: "$resourceId", n: { $sum: 1 } } },
+        { $match: { n: { $gt: 1 } } },
+        { $count: "n" },
+      ]).toArray()[0]?.n || 0
+    : null,
+  acl_agents_granted: has("aclentries")
+    ? db.aclentries.distinct("resourceId", { resourceType: "agent" }).length : null,share_records: has("sharedagents") ? db.sharedagents.countDocuments() : null,
   share_records_public: has("sharedagents")
     ? db.sharedagents.countDocuments({ isPublic: true }) : null,
   agents_flagged_shared: db.agents.countDocuments({ isShared: true }),

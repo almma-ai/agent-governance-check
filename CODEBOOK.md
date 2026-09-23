@@ -118,6 +118,30 @@ owner; the check tests for non-empty values.
 
 ---
 
+## Sharing mechanism
+
+Two independent paths can make an agent reachable beyond its author, and they
+are not visible to each other.
+
+| Field | Meaning |
+| --- | --- |
+| `acl_agent_grants_total` | Permission grants recorded against agents |
+| `acl_agents_granted` | Distinct agents carrying at least one grant |
+| `acl_agents_with_multiple_grants` | Agents with more than one grant |
+| `share_records` | Documents in a fork-specific share collection |
+| `share_records_public` | Share records flagged public |
+| `agents_flagged_shared` | Agents whose own `isShared` field is set |
+
+Where every agent carries exactly one grant and none carries more than one,
+the access-control layer records ownership and nothing else: no agent has been
+granted to a second principal of any kind. Share records existing alongside
+that pattern indicate a sharing path implemented outside the permission
+system, which a permissions audit would not see.
+
+This check does not determine whether opening a share link requires
+authentication, nor whether share identifiers are guessable. Both are worth
+testing directly on your own deployment.
+
 ## Audit coverage
 
 Lifecycle events that occurred, against records retained:

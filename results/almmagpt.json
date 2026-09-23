@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "snapshot_utc": "2026-09-23T10:34:14.337Z",
+  "snapshot_utc": "2026-09-23T11:45:17.616Z",
   "deployment": {
     "label": "almmagpt",
     "kind": "public",
@@ -22,8 +22,8 @@
     "users": 2282,
     "agents": 3478,
     "agent_authors": 691,
-    "conversations": 15338,
-    "conversations_via_agent": 14188
+    "conversations": 15341,
+    "conversations_via_agent": 14191
   },
   "audit_coverage": {
     "audit_documents": 0,
@@ -37,21 +37,21 @@
     "agents_referenced_by_conversations": 2307,
     "agents_still_present": 1937,
     "agents_deleted": 370,
-    "conversations_on_present_agents": 5421,
-    "conversations_on_deleted_agents": 8767,
+    "conversations_on_present_agents": 5422,
+    "conversations_on_deleted_agents": 8769,
     "pct_traffic_unreviewable": 61.8
   },
   "cuts": {
     "all_agents": {
       "agents": 3478,
-      "conversations": 5421,
+      "conversations": 5422,
       "hard_fail_agents": 1981,
       "hard_fail_conversations": 3182,
       "hard_fail_pct": 57,
       "checks": {
         "external_reach_unbounded": {
           "agents": 1185,
-          "conversations": 1973
+          "conversations": 1972
         },
         "no_escalation": {
           "agents": 3222,
@@ -59,19 +59,19 @@
         },
         "no_prohibitions": {
           "agents": 2167,
-          "conversations": 3038
+          "conversations": 3037
         },
         "no_named_contact": {
           "agents": 3379,
-          "conversations": 5365
+          "conversations": 5366
         },
         "revised_without_record": {
           "agents": 1125,
-          "conversations": 3433
+          "conversations": 3434
         },
         "author_has_persistent_memory": {
           "agents": 2733,
-          "conversations": 5024
+          "conversations": 5025
         },
         "no_instructions": {
           "agents": 442,
@@ -79,15 +79,15 @@
         },
         "no_role_statement": {
           "agents": 1568,
-          "conversations": 1991
+          "conversations": 1992
         },
         "drift_while_shared": {
           "agents": 526,
-          "conversations": 1838
+          "conversations": 1839
         },
         "reachable_beyond_author": {
           "agents": 1588,
-          "conversations": 2972
+          "conversations": 2973
         },
         "capability_without_scope": {
           "agents": 44,
@@ -118,14 +118,14 @@
     },
     "used_at_least_once": {
       "agents": 1937,
-      "conversations": 5421,
+      "conversations": 5422,
       "hard_fail_agents": 1085,
       "hard_fail_conversations": 3182,
       "hard_fail_pct": 56,
       "checks": {
         "external_reach_unbounded": {
           "agents": 816,
-          "conversations": 1973
+          "conversations": 1972
         },
         "no_escalation": {
           "agents": 1765,
@@ -133,31 +133,31 @@
         },
         "no_prohibitions": {
           "agents": 1140,
-          "conversations": 3038
+          "conversations": 3037
         },
         "no_named_contact": {
           "agents": 1907,
-          "conversations": 5365
+          "conversations": 5366
         },
         "revised_without_record": {
           "agents": 897,
-          "conversations": 3433
+          "conversations": 3434
         },
         "author_has_persistent_memory": {
           "agents": 1777,
-          "conversations": 5024
+          "conversations": 5025
         },
         "drift_while_shared": {
           "agents": 395,
-          "conversations": 1838
+          "conversations": 1839
         },
         "reachable_beyond_author": {
           "agents": 917,
-          "conversations": 2972
+          "conversations": 2973
         },
         "no_role_statement": {
           "agents": 815,
-          "conversations": 1991
+          "conversations": 1992
         },
         "no_instructions": {
           "agents": 2,
@@ -187,14 +187,14 @@
     },
     "used_5_or_more": {
       "agents": 174,
-      "conversations": 2776,
+      "conversations": 2777,
       "hard_fail_agents": 99,
       "hard_fail_conversations": 1694,
       "hard_fail_pct": 56.9,
       "checks": {
         "external_reach_unbounded": {
           "agents": 50,
-          "conversations": 874
+          "conversations": 873
         },
         "no_escalation": {
           "agents": 151,
@@ -202,31 +202,31 @@
         },
         "no_prohibitions": {
           "agents": 99,
-          "conversations": 1543
+          "conversations": 1542
         },
         "no_named_contact": {
           "agents": 173,
-          "conversations": 2768
+          "conversations": 2769
         },
         "revised_without_record": {
           "agents": 124,
-          "conversations": 2124
+          "conversations": 2125
         },
         "author_has_persistent_memory": {
           "agents": 158,
-          "conversations": 2601
+          "conversations": 2602
         },
         "drift_while_shared": {
           "agents": 67,
-          "conversations": 1262
+          "conversations": 1263
         },
         "reachable_beyond_author": {
           "agents": 103,
-          "conversations": 1717
+          "conversations": 1718
         },
         "no_role_statement": {
           "agents": 64,
-          "conversations": 863
+          "conversations": 864
         },
         "capability_without_scope": {
           "agents": 2,
@@ -252,7 +252,8 @@
   },
   "sharing": {
     "acl_agent_grants_total": 3478,
-    "acl_agent_grants_nonowner": 0,
+    "acl_agents_with_multiple_grants": 0,
+    "acl_agents_granted": 3478,
     "share_records": 1114,
     "share_records_public": 1114,
     "agents_flagged_shared": 662
@@ -344,7 +345,7 @@
         "agents": 5
       },
       {
-        "_id": "wolfram",
+        "_id": "image_gen_oai",
         "agents": 3
       },
       {
@@ -352,15 +353,15 @@
         "agents": 3
       },
       {
-        "_id": "image_gen_oai",
+        "_id": "wolfram",
         "agents": 3
       },
       {
-        "_id": "<action_tool>",
+        "_id": "youtube",
         "agents": 2
       },
       {
-        "_id": "youtube",
+        "_id": "<action_tool>",
         "agents": 2
       },
       {
@@ -372,15 +373,7 @@
         "agents": 1
       },
       {
-        "_id": "get_mass_readings_mcp_magisterium-mcp",
-        "agents": 1
-      },
-      {
         "_id": "flux",
-        "agents": 1
-      },
-      {
-        "_id": "search_mcp_magisterium-mcp",
         "agents": 1
       },
       {
@@ -388,7 +381,15 @@
         "agents": 1
       },
       {
+        "_id": "get_mass_readings_mcp_magisterium-mcp",
+        "agents": 1
+      },
+      {
         "_id": "chat_mcp_magisterium-mcp",
+        "agents": 1
+      },
+      {
+        "_id": "search_mcp_magisterium-mcp",
         "agents": 1
       },
       {
