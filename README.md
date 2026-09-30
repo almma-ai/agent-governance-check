@@ -1,4 +1,5 @@
 # Agent Governance Check
+> Checks agents against the [Delegation Charter Specification](https://github.com/almma-ai/delegation-charter), an open standard for AI agent accountability.
 
 A read-only check that measures how much of a LibreChat deployment's agent
 population would fail a delegation policy review, and how much of it was never
