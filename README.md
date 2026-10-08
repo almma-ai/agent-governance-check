@@ -1,5 +1,7 @@
 # Agent Governance Check
 > Checks agents against the [Delegation Charter Specification](https://github.com/almma-ai/delegation-charter), an open standard for AI agent accountability.
+>
+> **Looking to diagnose your own deployment?** Use [librechat-charter-diagnostic](https://github.com/almma-ai/librechat-charter-diagnostic): a per-agent report against the full charter, with a draft charter for every agent. This repository stays at codebook v1.0, so results submitted here remain comparable across deployments.
 
 A read-only check that measures how much of a LibreChat deployment's agent
 population would fail a delegation policy review, and how much of it was never
