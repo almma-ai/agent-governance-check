@@ -1,6 +1,8 @@
 # Codebook
 
-Every check, its exact definition, and what it gets wrong. Version 1.0.
+Every check, its exact definition, and what it gets wrong. Version 1.1.
+Everything defined for 1.0 is unchanged; 1.1 adds the fields described in
+[Version 1.1 additions](#version-11-additions).
 
 Field names refer to the `agents` collection unless stated. All checks are
 computed from stored configuration; none involves running an agent or reading
@@ -202,7 +204,89 @@ is reported separately and cannot be attributed to any cut.
 
 ---
 
+## Version 1.1 additions
+
+Version 1.1 adds fields and changes none. With `AGC_SUPPRESS_SMALL=0`, every
+1.0 field is computed and reported exactly as in 1.0, so 1.0 and 1.1
+submissions remain comparable on the fields they share.
+
+### Reachability through the access-control layer
+
+Current upstream LibreChat records agent sharing in `aclentries`: a grant on a
+resource of type `agent` to another user, a group, a role, or the public. The
+1.0 definition of `reachable_beyond_author` reads only `isShared`, a fork's
+`sharedagents` collection, and project membership, which current stock
+deployments do not populate. On a stock deployment, 1.0 therefore reports
+little or no sharing and little or no drift.
+
+1.1 counts an agent as reachable beyond its author if the 1.0 definition holds
+**or** the agent carries any `aclentries` grant (resource type `agent`, matched
+on the agent's `_id`) to a principal that is not the author: a different user,
+any group, any role, or the public. The author's own grant is excluded. Grants
+of type `remoteAgent` are counted separately in
+`sharing.acl_remote_agent_grants` and do not affect reachability.
+
+Reported per cut under `v1_1`: `reachable_beyond_author` and
+`drift_while_shared` (reachable as above **and** revised, as in 1.0).
+
+On a deployment whose access-control layer holds only owner grants, as on the
+1.0 reference deployment, the 1.1 values equal the 1.0 values.
+
+### Structural hard tier
+
+The cross-site headline. An agent fails if it meets any of:
+
+- `no_instructions`
+- `capability_without_scope` (tools held, under 200 characters of instructions)
+- `drift_while_shared` (1.1 reachability)
+
+None of these reads the words of the instructions, only their presence and
+length, so the rate means the same for agents instructed in any language.
+Reported per cut as `v1_1.structural_hard_fail_agents`, `_conversations` and
+`_pct`.
+
+`v1_1.hard_fail_*` is the 1.0 hard tier recomputed with 1.1 reachability: the
+structural tier plus the two English keyword checks
+(`external_reach_unbounded`, `code_exec_unbounded`).
+
+### Small-count suppression
+
+On by default. Every count from 1 to 4 is reported as the string `"<5"`, so
+that results from a small deployment cannot single out an individual. Zero is
+reported as zero, because an empty audit log is a finding. Fields whose names
+contain `pct`, and histogram bucket labels (`_id`), are left as computed.
+Tools held by fewer than five agents are grouped into one bucket, so that a
+rare custom tool or MCP server name cannot point to an author.
+
+Set `AGC_SUPPRESS_SMALL=0` only for internal use. Submissions should be made
+with suppression on, and the output records which was used in
+`small_counts_suppressed`.
+
+**Known limits of suppression.** A percentage computed from a small numerator
+can still be combined with its denominator to recover the count. On very small
+deployments, review the output before sharing it.
+
+### Sharing summary
+
+`sharing` adds `acl_agents_shared_beyond_author` (agents with at least one
+such grant), `acl_agent_grants_by_principal_type`, and
+`acl_remote_agent_grants`.
+
+### Known issue carried from 1.0
+
+`deployment.is_fork` is true when any of `sharedagents`, `agentapikeys`,
+`auditlogs` or `memoryentries` exists. Newer stock releases may create
+`auditlogs` or `memoryentries`, so contributors should state in their
+submission whether the deployment is a fork. The field is left unchanged for
+comparability.
+
+---
+
 ## Changes
+
+**1.1** — adds reachability through the access-control layer, the structural
+hard tier, small-count suppression and rare-tool grouping. No 1.0 field
+changes. Tested against mock stock and fork databases (see `test/`).
 
 **1.0** — initial release. Checks as run against a production deployment on
 23 September 2026.

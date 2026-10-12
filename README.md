@@ -46,6 +46,12 @@ while others could use it:
 | `code_exec_unbounded` | Executes code, no stated prohibitions |
 | `drift_while_shared` | Revised after being made reachable by others |
 
+**Structural tier (v1.1, the cross-site headline)** — `no_instructions`,
+`capability_without_scope` and `drift_while_shared`. None of them reads the
+words of an agent's instructions, so the rate means the same for agents
+instructed in German, French or English. The keyword-based checks are reported
+alongside it as an English-only measure.
+
 **Context tier** — reported but not counted as failures, because they are
 often near-universal: `no_escalation`, `no_prohibitions`, `no_role_statement`,
 `no_named_contact`, `reachable_beyond_author`, `revised_without_record`,
@@ -68,7 +74,7 @@ Full definitions, including the regular expressions, are in
 Aggregate counts only. The script reads no message bodies and prints no
 instruction text, names, email addresses, identifiers or hostnames. Nothing it
 emits can be traced to a user or an agent. Read
-`scripts/agent_governance_check.js` before running it — it is under 250 lines
+`scripts/agent_governance_check.js` before running it — it is about 330 lines
 and every query is visible.
 
 Results are reported over three populations, so that failures among working
@@ -105,6 +111,16 @@ detected by keyword patterns. Agents governed in other languages read as
 failing, which biases the rate upward. Structural checks — tools held, sharing
 state, revision history, deletion — are exact and unaffected.
 
+**Small counts are suppressed.** From v1.1, every count from 1 to 4 is
+reported as `"<5"`, and tools held by fewer than five agents are grouped, so
+that a small deployment's results cannot single out an individual. Set
+`AGC_SUPPRESS_SMALL=0` only for internal use.
+
+**Stock deployments share agents through the access-control layer.** v1.0
+counted sharing only through fork-specific fields, which undercounts sharing
+and drift on current upstream LibreChat. v1.1 adds access-control grants in a
+separate `v1_1` block, leaving every v1.0 field unchanged.
+
 **Fork-specific collections are optional.** `sharedagents`, `agentapikeys`,
 `auditlogs` and `memoryentries` do not exist on stock LibreChat. The script
 detects and skips them, reporting `null` rather than failing. Submissions note
@@ -119,6 +135,7 @@ scripts/as-run/ the original three-pass scripts, for provenance
 schema/submission.schema.json structure of a valid results file
 CODEBOOK.md check definitions and patterns
 CONTRIBUTING.md how to submit results
+test/ mock stock and fork databases; checks v1.1 against v1.0
 results/ submitted aggregates, one file per deployment
 
 

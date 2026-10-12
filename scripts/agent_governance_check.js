@@ -1,4 +1,4 @@
-// agent_governance_check.js  v1.0
+// agent_governance_check.js  v1.1
 // Read-only governance check for LibreChat-derived deployments.
 //
 //   mongosh "mongodb://localhost:27017/LibreChat" --quiet --file agent_governance_check.js > submission.json
@@ -8,9 +8,20 @@
 // Nothing it prints can be traced to a user or an agent.
 //
 // Optional environment: DEPLOYMENT_LABEL, DEPLOYMENT_KIND, LIBRECHAT_VERSION.
+// AGC_SUPPRESS_SMALL=0 turns off small-count suppression (for internal use only;
+// leave it on for anything you share).
+//
+// v1.1 adds, without changing any v1.0 field:
+//   - cuts.*.v1_1: reachability that includes LibreChat's access-control layer
+//     (stock deployments share agents there), and a structural hard-fail rate
+//     that does not depend on the language of agent instructions;
+//   - sharing.acl_*: grants to principals other than the agent's author;
+//   - counts from 1 to 4 reported as "<5", and tools held by fewer than five
+//     agents grouped into one bucket.
 
 const out = {
-  schema_version: "1.0",
+  schema_version: "1.1",
+  codebook_version: "1.1",
   snapshot_utc: new Date().toISOString(),
   deployment: {
     label: process.env.DEPLOYMENT_LABEL || null,      // e.g. "org-a" or "anon-1"
@@ -19,6 +30,10 @@ const out = {
     is_fork: null,                                     // filled below
   },
 };
+
+// v1.1: small-count suppression is on unless AGC_SUPPRESS_SMALL=0 (section 9).
+// With it off, every v1.0 field is computed and reported exactly as in v1.0.
+const SUPPRESS = (process.env.AGC_SUPPRESS_SMALL || "1") !== "0";
 
 const names = new Set(db.getCollectionNames());
 const has = (c) => names.has(c);
@@ -86,6 +101,23 @@ safe(() => db.conversations.aggregate([
   { $group: { _id: "$agent_id", n: { $sum: 1 } } },
 ]).forEach((r) => { convCount[String(r._id)] = r.n; }), null);
 
+// v1.1: agent grants in the access-control layer. Stock LibreChat records
+// sharing here (to another user, a group, a role, or the public); the owner's
+// own grant is excluded per agent below.
+const aclPrincipals = new Map();   // agent _id -> [{t: principalType, id: principalId}]
+if (has("aclentries")) {
+  safe(() => db.aclentries.find(
+    { resourceType: "agent" },
+    { principalType: 1, principalId: 1, resourceId: 1 },
+  ).forEach((e) => {
+    const k = String(e.resourceId);
+    if (!aclPrincipals.has(k)) aclPrincipals.set(k, []);
+    aclPrincipals.get(k).push({ t: e.principalType, id: String(e.principalId) });
+  }), null);
+}
+const aclSharedBeyondAuthor = (a) => (aclPrincipals.get(String(a._id)) || [])
+  .some((p) => p.t !== "user" || p.id !== String(a.author));
+
 // ----------------------------------------------- 4. orphaned traffic (C14)
 const liveIds = new Set(db.agents.distinct("id").map(String));
 let orphanConv = 0, orphanAgents = 0, liveConv = 0, liveAgents = 0;
@@ -114,11 +146,16 @@ const CODE = /execute_code/i;
 // --------------------------------------------- 6. checks, over three cuts
 const HARD = ["no_instructions", "capability_without_scope", "external_reach_unbounded",
               "code_exec_unbounded", "drift_while_shared"];
+// v1.1: the structural tier uses no language patterns, so it reads the same
+// for agents instructed in any language. It is the cross-site headline.
+const STRUCTURAL = ["no_instructions", "capability_without_scope", "drift_while_shared"];
 
 function evaluate(minConversations) {
   const per = {};
   let agents = 0, conversations = 0, hard = 0, hardConv = 0;
   const failDist = {};
+  // v1.1 counters (reachability includes the access-control layer)
+  const v11 = { reach: [0, 0], drift: [0, 0], structural: [0, 0], hard: [0, 0] };
 
   db.agents.find({}, {
     id: 1, author: 1, instructions: 1, tools: 1, mcpServerNames: 1, actions: 1,
@@ -166,7 +203,19 @@ function evaluate(minConversations) {
     const isHard = f.some((k) => HARD.includes(k));
     if (isHard) { hard += 1; hardConv += cv; }
     failDist[f.length] = (failDist[f.length] || 0) + 1;
+
+    // v1.1: same checks, with reachability that also counts ACL grants
+    const shared11 = shared || aclSharedBeyondAuthor(a);
+    const drift11 = shared11 && edited;
+    const f11 = f.filter((k) => k !== "drift_while_shared");
+    if (drift11) f11.push("drift_while_shared");
+    const bump = (pair) => { pair[0] += 1; pair[1] += cv; };
+    if (shared11) bump(v11.reach);
+    if (drift11) bump(v11.drift);
+    if (f11.some((k) => STRUCTURAL.includes(k))) bump(v11.structural);
+    if (f11.some((k) => HARD.includes(k))) bump(v11.hard);
   });
+  const pct = (n) => +(100 * n / Math.max(agents, 1)).toFixed(1);
 
   return {
     agents, conversations,
@@ -176,6 +225,16 @@ function evaluate(minConversations) {
     checks: per,
     fail_count_distribution: Object.fromEntries(
       Object.entries(failDist).sort((x, y) => Number(x[0]) - Number(y[0]))),
+    v1_1: {
+      reachable_beyond_author: { agents: v11.reach[0], conversations: v11.reach[1] },
+      drift_while_shared: { agents: v11.drift[0], conversations: v11.drift[1] },
+      structural_hard_fail_agents: v11.structural[0],
+      structural_hard_fail_conversations: v11.structural[1],
+      structural_hard_fail_pct: pct(v11.structural[0]),
+      hard_fail_agents: v11.hard[0],
+      hard_fail_conversations: v11.hard[1],
+      hard_fail_pct: pct(v11.hard[0]),
+    },
   };
 }
 
@@ -202,6 +261,22 @@ out.sharing = {
   share_records_public: has("sharedagents")
     ? db.sharedagents.countDocuments({ isPublic: true }) : null,
   agents_flagged_shared: db.agents.countDocuments({ isShared: true }),
+  // v1.1: grants to anyone other than the agent's author
+  acl_agents_shared_beyond_author: has("aclentries") ? safe(() => {
+    let n = 0;
+    db.agents.find({}, { _id: 1, author: 1 }).forEach((a) => {
+      if (aclSharedBeyondAuthor(a)) n += 1;
+    });
+    return n;
+  }, null) : null,
+  acl_agent_grants_by_principal_type: has("aclentries")
+    ? Object.fromEntries(safe(() => db.aclentries.aggregate([
+        { $match: { resourceType: "agent" } },
+        { $group: { _id: "$principalType", n: { $sum: 1 } } },
+      ]).toArray(), []).map((r) => [String(r._id), r.n]))
+    : null,
+  acl_remote_agent_grants: has("aclentries")
+    ? db.aclentries.countDocuments({ resourceType: "remoteAgent" }) : null,
 };
 
 // ------------------------------------------- 8. capability surface (context)
@@ -214,7 +289,18 @@ out.capability_surface = {
           "<action_tool>", "$tools" ] },
         agents: { $sum: 1 } } },
     { $sort: { agents: -1 } }, { $limit: 40 },
-  ]).toArray(),
+  ]).toArray().reduce((acc, r) => {
+    // v1.1 (with suppression on): tools held by fewer than five agents are
+    // grouped, so that a rare custom tool or MCP server name cannot point to
+    // an individual
+    if (!SUPPRESS || r.agents >= 5) acc.push(r);
+    else {
+      const other = acc.find((x) => x._id === "<tools held by fewer than 5 agents>");
+      if (other) other.agents += r.agents;
+      else acc.push({ _id: "<tools held by fewer than 5 agents>", agents: r.agents });
+    }
+    return acc;
+  }, []),
   instruction_length: db.agents.aggregate([
     { $project: { len: { $strLenCP: { $ifNull: ["$instructions", ""] } } } },
     { $bucket: { groupBy: "$len", boundaries: [0, 1, 201, 1001, 4001, 16001],
@@ -230,4 +316,18 @@ out.capability_surface = {
   agents_declaring_memory_tool: db.agents.countDocuments({ tools: "memory" }),
 };
 
-print(JSON.stringify(out, null, 2));
+// ------------------------------------------ 9. small-count suppression (v1.1)
+// Counts from 1 to 4 are reported as "<5". Zero is kept: an empty audit log is
+// a finding. Percentages and bucket labels are left as they are.
+const KEEP = (k) => k === "_id" || /pct/.test(k);
+function suppress(v, k) {
+  if (Array.isArray(v)) return v.map((x) => suppress(x, k));
+  if (v && typeof v === "object" && !(v instanceof Date)) {
+    return Object.fromEntries(Object.entries(v).map(([kk, vv]) =>
+      [kk, KEEP(kk) ? vv : suppress(vv, kk)]));
+  }
+  return Number.isInteger(v) && v > 0 && v < 5 ? "<5" : v;
+}
+out.small_counts_suppressed = SUPPRESS;
+
+print(JSON.stringify(SUPPRESS ? suppress(out) : out, null, 2));

@@ -14,8 +14,9 @@ mongosh "mongodb://localhost:27017/LibreChat" --quiet \
   --file scripts/agent_governance_check.js > results/anon-1.json
 ```
 
-Read the script first. It is under 250 lines, read-only, and every query is
-visible. Run it off-peak if the deployment is busy: it walks the agents
+Read the script first. It is about 330 lines, read-only, and every query is
+visible. Leave small-count suppression on (the default) for anything you
+submit; the output records it as `"small_counts_suppressed": true`. Run it off-peak if the deployment is busy: it walks the agents
 collection three times.
 
 ## Check the output before you submit

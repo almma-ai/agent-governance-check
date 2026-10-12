@@ -2,12 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Lucas-almma/agent-governance-check/schema/submission.schema.json",
   "title": "Agent governance check submission",
-  "description": "Aggregate output of agent_governance_check.js. Counts only; contains no user or agent identifiers.",
+  "description": "Aggregate output of agent_governance_check.js. Counts only; contains no user or agent identifiers. From v1.1, counts from 1 to 4 appear as the string \"<5\".",
   "type": "object",
   "required": ["schema_version", "snapshot_utc", "deployment", "scale", "audit_coverage", "cuts"],
   "additionalProperties": true,
   "properties": {
-    "schema_version": { "type": "string", "const": "1.0" },
+    "schema_version": { "type": "string", "enum": ["1.0", "1.1"] },
+    "codebook_version": { "type": "string" },
+    "small_counts_suppressed": { "type": "boolean" },
     "snapshot_utc": { "type": "string", "format": "date-time" },
     "deployment": {
       "type": "object",
@@ -26,30 +28,30 @@
     "scale": {
       "type": "object",
       "properties": {
-        "users": { "type": ["integer", "null"] },
-        "agents": { "type": "integer" },
-        "agent_authors": { "type": "integer" },
-        "conversations": { "type": ["integer", "null"] },
-        "conversations_via_agent": { "type": ["integer", "null"] }
+        "users": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] },
+        "agents": { "$ref": "#/$defs/count" },
+        "agent_authors": { "$ref": "#/$defs/count" },
+        "conversations": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] },
+        "conversations_via_agent": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] }
       }
     },
     "audit_coverage": {
       "type": "object",
       "description": "Lifecycle events that occurred, against records retained of them.",
       "properties": {
-        "audit_documents": { "type": ["integer", "null"] },
-        "agents_created": { "type": "integer" },
-        "agents_revised": { "type": ["integer", "null"] },
-        "share_events": { "type": ["integer", "null"] },
-        "api_keys_issued": { "type": ["integer", "null"] },
-        "api_keys_used": { "type": ["integer", "null"] }
+        "audit_documents": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] },
+        "agents_created": { "$ref": "#/$defs/count" },
+        "agents_revised": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] },
+        "share_events": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] },
+        "api_keys_issued": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] },
+        "api_keys_used": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] }
       }
     },
     "deleted_agents": {
       "type": "object",
       "properties": {
-        "agents_deleted": { "type": "integer" },
-        "conversations_on_deleted_agents": { "type": "integer" },
+        "agents_deleted": { "$ref": "#/$defs/count" },
+        "conversations_on_deleted_agents": { "$ref": "#/$defs/count" },
         "pct_traffic_unreviewable": { "type": "number" }
       }
     },
@@ -62,14 +64,18 @@
     "capability_surface": { "type": "object" }
   },
   "$defs": {
+    "count": {
+      "description": "A non-negative count, or \"<5\" when small-count suppression is on (v1.1).",
+      "anyOf": [{ "type": "integer", "minimum": 0 }, { "const": "<5" }]
+    },
     "cut": {
       "type": "object",
       "required": ["agents", "hard_fail_agents", "hard_fail_pct", "checks"],
       "properties": {
-        "agents": { "type": "integer" },
-        "conversations": { "type": "integer" },
-        "hard_fail_agents": { "type": "integer" },
-        "hard_fail_conversations": { "type": "integer" },
+        "agents": { "$ref": "#/$defs/count" },
+        "conversations": { "$ref": "#/$defs/count" },
+        "hard_fail_agents": { "$ref": "#/$defs/count" },
+        "hard_fail_conversations": { "$ref": "#/$defs/count" },
         "hard_fail_pct": { "type": "number", "minimum": 0, "maximum": 100 },
         "checks": {
           "type": "object",
@@ -77,14 +83,14 @@
             "type": "object",
             "required": ["agents", "conversations"],
             "properties": {
-              "agents": { "type": "integer" },
-              "conversations": { "type": "integer" }
+              "agents": { "$ref": "#/$defs/count" },
+              "conversations": { "$ref": "#/$defs/count" }
             }
           }
         },
         "fail_count_distribution": {
           "type": "object",
-          "additionalProperties": { "type": "integer" }
+          "additionalProperties": { "$ref": "#/$defs/count" }
         }
       }
     }
