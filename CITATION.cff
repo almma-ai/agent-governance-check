@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this check or its results, please cite the paper below."
+title: "Agent Governance Check"
+authors:
+  - family-names: Wall
+    given-names: Lucas E.
+    orcid: "https://orcid.org/0009-0000-2813-9184"
+repository-code: "https://github.com/almma-ai/agent-governance-check"
+license: MIT
+version: "1.1"
+preferred-citation:
+  type: article
+  title: "Agents Outrun Review: A Read-Only Audit and Multi-Site Protocol for Delegated AI Agents"
+  authors:
+    - family-names: Wall
+      given-names: Lucas E.
+      orcid: "https://orcid.org/0009-0000-2813-9184"
+  journal: "SSRN Working Paper 7599098"
+  year: 2026
+  month: 10
+  url: "https://papers.ssrn.com/abstract=7599098"

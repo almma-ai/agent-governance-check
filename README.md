@@ -1,7 +1,9 @@
 # Agent Governance Check
 > Checks agents against the [Delegation Charter Specification](https://github.com/almma-ai/delegation-charter), an open standard for AI agent accountability.
 >
-> **Looking to diagnose your own deployment?** Use [librechat-charter-diagnostic](https://github.com/almma-ai/librechat-charter-diagnostic): a per-agent report against the full charter, with a draft charter for every agent. This repository stays at codebook v1.0, so results submitted here remain comparable across deployments.
+> **Looking to diagnose your own deployment?** Use [librechat-charter-diagnostic](https://github.com/almma-ai/librechat-charter-diagnostic): a per-agent report against the full charter, with a draft charter for every agent. Version 1.1 only adds fields; every v1.0 definition is unchanged, so results submitted here remain comparable across deployments.
+>
+> **Paper:** [Agents Outrun Review: A Read-Only Audit and Multi-Site Protocol for Delegated AI Agents](https://papers.ssrn.com/abstract=7599098) (SSRN 7599098).
 
 A read-only check that measures how much of a LibreChat deployment's agent
 population would fail a delegation policy review, and how much of it was never
@@ -138,6 +140,26 @@ CONTRIBUTING.md how to submit results
 test/ mock stock and fork databases; checks v1.1 against v1.0
 results/ submitted aggregates, one file per deployment
 
+
+---
+
+## Citation
+
+The design of this check and the multi-site protocol are described in:
+
+> Wall, Lucas E. 2026. "Agents Outrun Review: A Read-Only Audit and Multi-Site Protocol for Delegated AI Agents." SSRN Working Paper 7599098. https://papers.ssrn.com/abstract=7599098
+
+```bibtex
+@techreport{wall2026agents,
+  author      = {Wall, Lucas E.},
+  title       = {Agents Outrun Review: A Read-Only Audit and Multi-Site Protocol for Delegated AI Agents},
+  institution = {SSRN},
+  type        = {Working Paper},
+  number      = {7599098},
+  year        = {2026},
+  url         = {https://papers.ssrn.com/abstract=7599098}
+}
+```
 
 ---
 
