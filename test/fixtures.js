@@ -1,7 +1,7 @@
 // Two small LibreChat-shaped databases.
 //   stock: sharing recorded only in aclentries (current upstream LibreChat)
 //   fork:  sharing recorded in a fork's sharedagents collection / isShared flag;
-//          the ACL holds owner grants only (as on the AlmmaGPT pilot)
+//          the ACL holds owner grants only (as on the pilot deployment)
 const LONG = (s) => s + " " + "x".repeat(260);
 const t0 = new Date("2026-09-01T00:00:00Z"), t1 = new Date("2026-09-10T00:00:00Z");
 

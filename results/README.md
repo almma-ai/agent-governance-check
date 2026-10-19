@@ -1,6 +1,7 @@
 # Results
 
-One file per deployment, named by its label. See ../CONTRIBUTING.md.
+Aggregates posted with the written consent of the site that produced them.
+See ../PROTOCOL.md and ../CONTRIBUTING.md.
 
 Files here are aggregate counts only. No instruction text, names, addresses,
 identifiers or hostnames.

@@ -6,12 +6,12 @@ way, are a finding.
 ## Run the check
 
 ```bash
-export DEPLOYMENT_LABEL="anon-1"        # or your org name, your choice
+export DEPLOYMENT_LABEL=""              # leave blank for the multi-site study
 export DEPLOYMENT_KIND="enterprise"     # enterprise | team | hobby | public
 export LIBRECHAT_VERSION="v0.8.8"       # or your fork's version
 
 mongosh "mongodb://localhost:27017/LibreChat" --quiet \
-  --file scripts/agent_governance_check.js > results/anon-1.json
+  --file scripts/agent_governance_check.js > submission.json
 ```
 
 Read the script first. It is about 330 lines, read-only, and every query is
@@ -24,32 +24,40 @@ collection three times.
 The script is written to emit counts only, but verify for yourself:
 
 ```bash
-grep -iE '@|http|mongodb://' results/anon-1.json
+grep -iE '@|http|mongodb://' submission.json
 ```
 
-Should return nothing. If your fork stores something unexpected in a field the
-script reads, tell us in the PR rather than editing the file by hand — the
-script should be fixed for everyone.
+Should return nothing. Then review the two fields a site may change before
+sending: `snapshot_utc` (delete it or round it to the month if you do not share
+exact dates) and the tool names in `capability_surface.tools_histogram`
+(replace any custom name that would identify you). If your fork stores
+something unexpected in a field the script reads, tell us rather than editing
+the file by hand: the script should be fixed for everyone.
 
 ## Submit
 
-Open a PR adding one file to `results/`. Nothing else. In the PR description,
-note anything unusual about your deployment: restricted agent creation, an
-SSO-gated user base, a custom sharing model, whether agent creation is
-self-serve or provisioned.
-
-Anonymous is fine. `anon-N` as a label, and no identifying detail in the PR.
+Email `submission.json` to walll@cua.edu. Nothing is posted here by default.
+In the email, note anything unusual about your deployment: restricted agent
+creation, an SSO-gated user base, a custom sharing model, whether agent
+creation is self-serve or provisioned.
 
 ## What happens to submissions
 
-Aggregates in `results/` are public under this repository's MIT license.
-Analysis across submissions will be published with attribution to contributing
-deployments by label only, never by organisation, unless a contributor asks to
-be named.
+Submissions are handled as set out in [PROTOCOL.md](PROTOCOL.md):
+
+- files are stored only in the investigator's CUA account;
+- each site is published under a site number, and the key is never published;
+- a site is named in the list of participants, or has its file posted in
+  `results/`, only with its written consent;
+- each site reviews any wording about it before publication.
+
+To post your file publicly in `results/`, say so in writing, or open a PR
+adding it yourself.
 
 If a cross-deployment analysis becomes a paper, contributors who submit
 results and help interpret them will be offered co-authorship. Contributors
-who submit results alone will be acknowledged. Anyone can decline both.
+who submit results alone will be acknowledged if they wish. Anyone can decline
+both, and the default is neither.
 
 ## Improving the check
 

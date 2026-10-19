@@ -92,12 +92,11 @@ agents can be distinguished from abandoned drafts:
 
 A single deployment is a case study. Several are a measurement.
 
-If you run LibreChat or a fork, run the script and open a PR adding your
-`submission.json` to `results/`. See [CONTRIBUTING.md](CONTRIBUTING.md) for
-the submission schema and the two fields you should fill in by hand
-(deployment kind and version).
-
-Anonymous submissions are welcome — label your deployment `anon-N`.
+If you run LibreChat or a fork, run the script and email the output to
+walll@cua.edu. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run and check
+it, [PROTOCOL.md](PROTOCOL.md) for how submissions are stored, published and
+kept anonymous, and [DATA_DICTIONARY.md](DATA_DICTIONARY.md) for every field
+the script produces. Nothing is posted publicly without your written consent.
 
 ---
 
@@ -137,8 +136,10 @@ scripts/as-run/ the original three-pass scripts, for provenance
 schema/submission.schema.json structure of a valid results file
 CODEBOOK.md check definitions and patterns
 CONTRIBUTING.md how to submit results
+PROTOCOL.md multi-site study protocol: storage, publication, conflict of interest
+DATA_DICTIONARY.md every output field, with definitions
 test/ mock stock and fork databases; checks v1.1 against v1.0
-results/ submitted aggregates, one file per deployment
+results/ aggregates posted with the site's written consent
 
 
 ---
