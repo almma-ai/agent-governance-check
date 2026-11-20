@@ -1,6 +1,6 @@
 # Data dictionary
 
-Every field in the version 1.1 output file. Full rules and patterns are in [CODEBOOK.md](CODEBOOK.md); the study protocol is in [PROTOCOL.md](PROTOCOL.md).
+Every field in the version 1.2 output file. Full rules and patterns are in [CODEBOOK.md](CODEBOOK.md); the study protocol is in [PROTOCOL.md](PROTOCOL.md).
 
 Counts are whole numbers or "<5". Percentages have one decimal and are never suppressed. `null` means the collection behind the field does not exist on that deployment.
 
@@ -8,7 +8,7 @@ Counts are whole numbers or "<5". Percentages have one decimal and are never sup
 
 | Field | Definition |
 | --- | --- |
-| `schema_version`, `codebook_version` | Version of the output format and of the rules, "1.1". |
+| `schema_version`, `codebook_version` | Version of the output format and of the rules, "1.2". |
 | `snapshot_utc` | Time of the run. A site may delete it or round it to the month. |
 | `deployment.label` | Optional label set by the site (`DEPLOYMENT_LABEL`). For the multi-site study, leave blank: the investigator assigns site numbers. |
 | `deployment.kind` | Optional (`DEPLOYMENT_KIND`): enterprise, team, hobby or public. |
@@ -26,7 +26,9 @@ Counts are whole numbers or "<5". Percentages have one decimal and are never sup
 | `scale.agents` | Number of agents. |
 | `scale.agent_authors` | Number of distinct accounts that created at least one agent. |
 | `scale.conversations` | Number of conversations. |
-| `scale.conversations_via_agent` | Conversations held with an agent. |
+| `scale.conversations_via_agent` | Conversations with any agent ID, including temporary IDs (legacy; see `scale.v1_2`). |
+| `scale.v1_2.conversations_via_saved_agent` | Conversations held with a saved agent (ID starting with `agent_`). |
+| `scale.v1_2.conversations_with_temporary_agent_id` | Conversations that used no saved agent but carry a temporary agent ID, such as `ephemeral`. |
 | `audit_coverage.audit_documents` | Entries in an audit log, if the deployment has one. |
 | `audit_coverage.agents_created` | Same as `scale.agents`. |
 | `audit_coverage.agents_revised` | Agents with two or more saved versions. |
@@ -40,7 +42,9 @@ Counts are whole numbers or "<5". Percentages have one decimal and are never sup
 | `deleted_agents.agents_referenced_by_conversations` | Distinct agents named in conversations. |
 | `deleted_agents.agents_still_present`, `agents_deleted` | Of those, agents that still exist and agents that have been deleted. |
 | `deleted_agents.conversations_on_present_agents`, `conversations_on_deleted_agents` | Conversations held with each group. |
-| `deleted_agents.pct_traffic_unreviewable` | Share of agent conversations whose agent no longer exists, so its configuration can no longer be reviewed. |
+| `deleted_agents.pct_traffic_unreviewable` | Legacy (v1.0/v1.1): share of conversations whose agent ID has no matching agent. On current LibreChat this counts temporary IDs as deleted agents and overstates the figure; use the `v1_2` value. |
+| `deleted_agents.v1_2.*` | The same six fields computed over saved agents only (IDs starting with `agent_`). `v1_2.pct_traffic_unreviewable` is the share of saved-agent conversations whose agent no longer exists, so its configuration can no longer be reviewed. |
+| `deleted_agents.v1_2.temporary_agent_ids`, `conversations_with_temporary_agent_id` | Distinct temporary agent IDs, and the conversations that carry them. These are not deleted agents. |
 
 ## Checks, reported for three groups of agents
 

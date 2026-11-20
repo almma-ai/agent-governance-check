@@ -29,7 +29,9 @@ function agents() {
 const conv = (id, n) => Array.from({ length: n }, () => ({ agent_id: id }));
 const conversations = () => [
   ...conv("agent_A1", 2), ...conv("agent_A3", 6), ...conv("agent_A4", 1), ...conv("agent_A5", 3),
-  ...conv("agent_A8", 5), ...conv("deleted_1", 4), ...conv("deleted_2", 1), {}, {},
+  ...conv("agent_A8", 5), ...conv("agent_D1", 4), ...conv("agent_D2", 1), {}, {},
+  // v1.2: chats that used no saved agent carry a temporary agent ID on current LibreChat
+  ...conv("ephemeral", 3), ...conv("gpt-4o", 2),
 ];
 const users = () => ["u1", "u2", "u3", "u4", "u5"].map((u) => ({ _id: u }));
 const ownerGrants = (ags) => ags.map((x) => ({

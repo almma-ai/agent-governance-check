@@ -1,8 +1,9 @@
 # Codebook
 
-Every check, its exact definition, and what it gets wrong. Version 1.1.
-Everything defined for 1.0 is unchanged; 1.1 adds the fields described in
-[Version 1.1 additions](#version-11-additions).
+Every check, its exact definition, and what it gets wrong. Version 1.2.
+Everything defined for 1.0 is unchanged; 1.1 and 1.2 add the fields described in
+[Version 1.1 additions](#version-11-additions) and
+[Version 1.2 additions](#version-12-additions).
 
 Field names refer to the `agents` collection unless stated. All checks are
 computed from stored configuration; none involves running an agent or reading
@@ -280,9 +281,47 @@ such grant), `acl_agent_grants_by_principal_type`, and
 submission whether the deployment is a fork. The field is left unchanged for
 comparability.
 
+## Version 1.2 additions
+
+Version 1.2 adds fields and changes none.
+
+### Saved agents and temporary agent IDs
+
+Current LibreChat writes an `agent_id` on conversations that used no saved
+agent: the value `ephemeral`, or an ID built from the model's name. Versions
+1.0 and 1.1 treated every `agent_id` with no matching row in `agents` as a
+deleted agent, so on current LibreChat those chats were counted as traffic on
+deleted agents. That inflates `deleted_agents.pct_traffic_unreviewable` and
+the related counts.
+
+1.2 counts as an agent only an ID that starts with `agent_`, the form LibreChat
+gives saved agents. Every other ID is reported as a temporary ID, not as a
+deleted agent:
+
+- `scale.v1_2.conversations_via_saved_agent` and
+  `scale.v1_2.conversations_with_temporary_agent_id`;
+- `deleted_agents.v1_2`: the deleted-agent fields recomputed over saved agents
+  only, plus `temporary_agent_ids` and
+  `conversations_with_temporary_agent_id`.
+
+The legacy fields are kept for comparison with 1.0 and 1.1 results. Analyses
+should use `deleted_agents.v1_2.pct_traffic_unreviewable`. A legacy figure
+cannot be corrected after the fact, because the output holds totals only;
+correct figures require a rerun with 1.2.
+
+The `cuts` are unaffected: they are built from rows in `agents`, and a
+temporary ID has none.
+
+The issue was reported by a participating site's engineering team in
+November 2026.
+
 ---
 
 ## Changes
+
+**1.2** — counts only saved agents (`agent_` IDs) in new `v1_2` fields and
+reports temporary agent IDs separately; legacy fields unchanged. Tested
+against mock databases that include temporary IDs.
 
 **1.1** — adds reachability through the access-control layer, the structural
 hard tier, small-count suppression and rare-tool grouping. No 1.0 field

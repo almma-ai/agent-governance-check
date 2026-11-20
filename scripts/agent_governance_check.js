@@ -1,4 +1,4 @@
-// agent_governance_check.js  v1.1
+// agent_governance_check.js  v1.2
 // Read-only governance check for LibreChat-derived deployments.
 //
 //   mongosh "mongodb://localhost:27017/LibreChat" --quiet --file agent_governance_check.js > submission.json
@@ -18,10 +18,19 @@
 //   - sharing.acl_*: grants to principals other than the agent's author;
 //   - counts from 1 to 4 reported as "<5", and tools held by fewer than five
 //     agents grouped into one bucket.
+//
+// v1.2 adds, without changing any v1.0 or v1.1 field:
+//   - scale.v1_2 and deleted_agents.v1_2: the same counts restricted to saved
+//     agents. Current LibreChat stores a temporary agent ID on chats that use
+//     no saved agent ("ephemeral", or one built from the model name). v1.0 and
+//     v1.1 counted each of those IDs as a deleted agent, which inflates
+//     pct_traffic_unreviewable on current LibreChat. A saved agent's ID starts
+//     with "agent_"; everything else is reported as a temporary ID.
+//     Reported by a participating site's engineering team, November 2026.
 
 const out = {
-  schema_version: "1.1",
-  codebook_version: "1.1",
+  schema_version: "1.2",
+  codebook_version: "1.2",
   snapshot_utc: new Date().toISOString(),
   deployment: {
     label: process.env.DEPLOYMENT_LABEL || null,      // e.g. "org-a" or "anon-1"
@@ -132,6 +141,31 @@ out.deleted_agents = {
   conversations_on_present_agents: liveConv,
   conversations_on_deleted_agents: orphanConv,
   pct_traffic_unreviewable: +(100 * orphanConv / Math.max(liveConv + orphanConv, 1)).toFixed(1),
+};
+
+// v1.2: count only saved agents. Saved agent IDs start with "agent_"; any other
+// value in conversations.agent_id is a temporary ID for a chat that used no
+// saved agent, and is reported separately rather than as a deleted agent.
+const SAVED = /^agent_/;
+let sLive = 0, sLiveAgents = 0, sOrphan = 0, sOrphanAgents = 0, tmpConv = 0, tmpIds = 0;
+for (const [id, n] of Object.entries(convCount)) {
+  if (!SAVED.test(id)) { tmpConv += n; tmpIds += 1; continue; }
+  if (liveIds.has(id)) { sLive += n; sLiveAgents += 1; }
+  else { sOrphan += n; sOrphanAgents += 1; }
+}
+out.scale.v1_2 = {
+  conversations_via_saved_agent: sLive + sOrphan,
+  conversations_with_temporary_agent_id: tmpConv,
+};
+out.deleted_agents.v1_2 = {
+  agents_referenced_by_conversations: sLiveAgents + sOrphanAgents,
+  agents_still_present: sLiveAgents,
+  agents_deleted: sOrphanAgents,
+  conversations_on_present_agents: sLive,
+  conversations_on_deleted_agents: sOrphan,
+  pct_traffic_unreviewable: +(100 * sOrphan / Math.max(sLive + sOrphan, 1)).toFixed(1),
+  temporary_agent_ids: tmpIds,
+  conversations_with_temporary_agent_id: tmpConv,
 };
 
 // ------------------------------------------------------------ 5. patterns

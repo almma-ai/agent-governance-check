@@ -7,7 +7,7 @@
   "required": ["schema_version", "snapshot_utc", "deployment", "scale", "audit_coverage", "cuts"],
   "additionalProperties": true,
   "properties": {
-    "schema_version": { "type": "string", "enum": ["1.0", "1.1"] },
+    "schema_version": { "type": "string", "enum": ["1.0", "1.1", "1.2"] },
     "codebook_version": { "type": "string" },
     "small_counts_suppressed": { "type": "boolean" },
     "snapshot_utc": { "type": "string", "format": "date-time" },
@@ -32,7 +32,14 @@
         "agents": { "$ref": "#/$defs/count" },
         "agent_authors": { "$ref": "#/$defs/count" },
         "conversations": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] },
-        "conversations_via_agent": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] }
+        "conversations_via_agent": { "anyOf": [{ "$ref": "#/$defs/count" }, { "type": "null" }] },
+        "v1_2": {
+          "type": "object",
+          "properties": {
+            "conversations_via_saved_agent": { "$ref": "#/$defs/count" },
+            "conversations_with_temporary_agent_id": { "$ref": "#/$defs/count" }
+          }
+        }
       }
     },
     "audit_coverage": {
@@ -52,7 +59,18 @@
       "properties": {
         "agents_deleted": { "$ref": "#/$defs/count" },
         "conversations_on_deleted_agents": { "$ref": "#/$defs/count" },
-        "pct_traffic_unreviewable": { "type": "number" }
+        "pct_traffic_unreviewable": { "type": "number", "description": "Legacy; counts temporary agent IDs as deleted agents. Use v1_2." },
+        "v1_2": {
+          "type": "object",
+          "description": "Deleted-agent fields over saved agents only (IDs starting with agent_), from v1.2.",
+          "properties": {
+            "agents_deleted": { "$ref": "#/$defs/count" },
+            "conversations_on_deleted_agents": { "$ref": "#/$defs/count" },
+            "pct_traffic_unreviewable": { "type": "number" },
+            "temporary_agent_ids": { "$ref": "#/$defs/count" },
+            "conversations_with_temporary_agent_id": { "$ref": "#/$defs/count" }
+          }
+        }
       }
     },
     "cuts": {

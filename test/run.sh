@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Runs v1.0 and v1.1 against mock stock and fork databases, then checks that
+# Runs v1.0 and the current version (v1.2) against mock stock and fork databases, then checks that
 # (a) with suppression off, every v1.0 field is identical between versions, and
-# (b) v1.1 counts sharing recorded in the access-control layer.
+# (b) v1.1 counts sharing recorded in the access-control layer, and
+# (c) v1.2 counts only saved agents, reporting temporary agent IDs separately.
 # Needs Node.js only; no database.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -44,5 +45,14 @@ check(sup.audit_coverage.agents_created === 12 && sup.cuts.all_agents.hard_fail_
   "suppression: percentages untouched");
 check(sup.capability_surface.tools_histogram.every((t) => t._id === "calculator" || t._id.startsWith("<")),
   "suppression: rare tool names grouped");
+const d = read("stock.v11.json");
+check(d.deleted_agents.pct_traffic_unreviewable === 37, "legacy: temporary IDs counted as deleted agents (37.0%), as in v1.0/v1.1");
+const v = d.deleted_agents.v1_2;
+check(v.agents_deleted === 2 && v.conversations_on_deleted_agents === 5, "v1.2: 2 deleted saved agents, 5 conversations");
+check(v.conversations_on_present_agents === 17 && v.agents_still_present === 5, "v1.2: 5 present agents, 17 conversations");
+check(v.pct_traffic_unreviewable === 22.7, "v1.2: unreviewable share over saved agents only = 22.7%");
+check(v.temporary_agent_ids === 2 && v.conversations_with_temporary_agent_id === 5, "v1.2: 2 temporary IDs, 5 conversations, reported separately");
+check(d.scale.v1_2.conversations_via_saved_agent === 22 && d.scale.conversations_via_agent === 27, "v1.2: 22 conversations via saved agents vs 27 legacy");
+check(d.schema_version === "1.2", "schema_version is 1.2");
 process.exit(fail);
 JS

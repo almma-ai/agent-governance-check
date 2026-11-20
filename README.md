@@ -1,7 +1,7 @@
 # Agent Governance Check
 > Checks agents against the [Delegation Charter Specification](https://github.com/almma-ai/delegation-charter), an open standard for AI agent accountability.
 >
-> **Looking to diagnose your own deployment?** Use [librechat-charter-diagnostic](https://github.com/almma-ai/librechat-charter-diagnostic): a per-agent report against the full charter, with a draft charter for every agent. Version 1.1 only adds fields; every v1.0 definition is unchanged, so results submitted here remain comparable across deployments.
+> **Looking to diagnose your own deployment?** Use [librechat-charter-diagnostic](https://github.com/almma-ai/librechat-charter-diagnostic): a per-agent report against the full charter, with a draft charter for every agent. Versions 1.1 and 1.2 only add fields; every v1.0 definition is unchanged, so results submitted here remain comparable across deployments.
 >
 > **Paper:** [Agents Outrun Review: A Read-Only Audit and Multi-Site Protocol for Delegated AI Agents](https://papers.ssrn.com/abstract=7599098) (SSRN 7599098).
 
@@ -122,6 +122,13 @@ counted sharing only through fork-specific fields, which undercounts sharing
 and drift on current upstream LibreChat. v1.1 adds access-control grants in a
 separate `v1_1` block, leaving every v1.0 field unchanged.
 
+**Use v1.2 on current LibreChat.** Current LibreChat stores a temporary agent
+ID on chats that use no saved agent. v1.0 and v1.1 counted those as deleted
+agents, which overstates `pct_traffic_unreviewable`, by a wide margin on deployments
+where most chats use no saved agent. v1.2 reports the corrected figures in `v1_2` blocks
+and the temporary IDs separately. A v1.1 result cannot be corrected afterwards;
+rerun with v1.2. Reported by a participating site's engineering team.
+
 **Fork-specific collections are optional.** `sharedagents`, `agentapikeys`,
 `auditlogs` and `memoryentries` do not exist on stock LibreChat. The script
 detects and skips them, reporting `null` rather than failing. Submissions note
@@ -138,7 +145,7 @@ CODEBOOK.md check definitions and patterns
 CONTRIBUTING.md how to submit results
 PROTOCOL.md multi-site study protocol: storage, publication, conflict of interest
 DATA_DICTIONARY.md every output field, with definitions
-test/ mock stock and fork databases; checks v1.1 against v1.0
+test/ mock stock and fork databases; checks v1.2 against v1.0
 results/ aggregates posted with the site's written consent
 
 
