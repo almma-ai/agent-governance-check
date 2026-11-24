@@ -26,6 +26,10 @@ for (const f of ["stock", "fork"]) {
         if (["snapshot_utc", "schema_version"].includes(k) && p === "") continue;
         if (!(k in y)) diffs.push(`${p}/${k} missing`); else cmp(x[k], y[k], `${p}/${k}`);
       }
+    } else if (Array.isArray(x) && p.startsWith("/capability_surface/")) {
+      // v1.2.1 sorts these lists deterministically; compare them as sets
+      const key = (arr) => arr.map((e) => JSON.stringify(e)).sort().join("|");
+      if (!Array.isArray(y) || key(x) !== key(y)) diffs.push(p);
     } else if (JSON.stringify(x) !== JSON.stringify(y)) diffs.push(p);
   };
   cmp(a, b, "");
@@ -54,5 +58,9 @@ check(v.pct_traffic_unreviewable === 22.7, "v1.2: unreviewable share over saved 
 check(v.temporary_agent_ids === 2 && v.conversations_with_temporary_agent_id === 5, "v1.2: 2 temporary IDs, 5 conversations, reported separately");
 check(d.scale.v1_2.conversations_via_saved_agent === 22 && d.scale.conversations_via_agent === 27, "v1.2: 22 conversations via saved agents vs 27 legacy");
 check(d.schema_version === "1.2", "schema_version is 1.2");
+const h = d.capability_surface.tools_histogram;
+check(h.every((x, i) => i === 0 || h[i-1].agents > x.agents || (h[i-1].agents === x.agents && String(h[i-1]._id) < String(x._id))), "v1.2.1: tools histogram sorted by count, ties by name");
+const il = d.capability_surface.instruction_length.map((x) => x._id);
+check(JSON.stringify(il) === JSON.stringify([...il].sort((a, b) => (typeof a === typeof b ? (a < b ? -1 : a > b ? 1 : 0) : (typeof a === "number" ? -1 : 1)))), "v1.2.1: length buckets sorted by lower bound");
 process.exit(fail);
 JS

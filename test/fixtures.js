@@ -17,8 +17,8 @@ function agents() {
     a("A3", "u2", LONG("You are a researcher."), ["web_search"], 3, true),  // reach, no prohibition, revised
     a("A4", "u2", LONG("You are a tutor. Do not grade."), [], 1, true),     // revised
     a("A5", "u3", LONG("You are a planner."), ["calculator"], 1, false),
+    a("A7", "u4", LONG("Never guess."), ["mytool_mcp_rare"], 1, false),     // rare tool  (listed first so tied tools arrive out of name order)
     a("A6", "u3", LONG("Never run destructive code."), ["execute_code"], 1, false),
-    a("A7", "u4", LONG("Never guess."), ["mytool_mcp_rare"], 1, false),     // rare tool
     a("A8", "u4", LONG("Never guess."), ["calculator"], 1, false),
     a("A9", "u4", LONG("Never guess."), ["calculator"], 1, false),
     a("A10", "u4", LONG("Never guess."), ["calculator"], 1, false),

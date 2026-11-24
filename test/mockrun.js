@@ -58,7 +58,12 @@ function aggregate(rows, pipeline) {
       }
       r = [...g.values()];
     } else if (op === "$count") r = r.length ? [{ [arg]: r.length }] : [];
-    else if (op === "$sort") { const [[k, dir]] = Object.entries(arg); r.sort((a, b) => (a[k] - b[k]) * dir); }
+    else if (op === "$sort") {
+      // multi-key sort; numbers before strings, as MongoDB orders mixed types
+      const keys = Object.entries(arg);
+      const cmp = (x, y) => (typeof x === typeof y ? (x < y ? -1 : x > y ? 1 : 0) : (typeof x === "number" ? -1 : 1));
+      r.sort((a, b) => { for (const [k, dir] of keys) { const c = cmp(a[k], b[k]) * dir; if (c) return c; } return 0; });
+    }
     else if (op === "$limit") r = r.slice(0, arg);
     else if (op === "$bucket") r = [];   // histogram buckets are not under test
     else throw new Error("unsupported stage " + op);

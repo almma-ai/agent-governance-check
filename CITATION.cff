@@ -7,7 +7,7 @@ authors:
     orcid: "https://orcid.org/0009-0000-2813-9184"
 repository-code: "https://github.com/almma-ai/agent-governance-check"
 license: MIT
-version: "1.2"
+version: "1.2.1"
 preferred-citation:
   type: article
   title: "Agents Outrun Review: A Read-Only Audit and Multi-Site Protocol for Delegated AI Agents"

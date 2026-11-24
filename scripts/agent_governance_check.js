@@ -1,4 +1,4 @@
-// agent_governance_check.js  v1.2
+// agent_governance_check.js  v1.2.1
 // Read-only governance check for LibreChat-derived deployments.
 //
 //   mongosh "mongodb://localhost:27017/LibreChat" --quiet --file agent_governance_check.js > submission.json
@@ -27,6 +27,10 @@
 //     pct_traffic_unreviewable on current LibreChat. A saved agent's ID starts
 //     with "agent_"; everything else is reported as a temporary ID.
 //     Reported by a participating site's engineering team, November 2026.
+//
+// v1.2.1 changes no counts: capability_surface lists are sorted
+// deterministically (ties by name; buckets by lower bound), so two runs on the
+// same data produce byte-identical output.
 
 const out = {
   schema_version: "1.2",
@@ -322,7 +326,7 @@ out.capability_surface = {
           { $regexMatch: { input: { $toString: "$tools" }, regex: "_action_" } },
           "<action_tool>", "$tools" ] },
         agents: { $sum: 1 } } },
-    { $sort: { agents: -1 } }, { $limit: 40 },
+    { $sort: { agents: -1, _id: 1 } }, { $limit: 40 },
   ]).toArray().reduce((acc, r) => {
     // v1.1 (with suppression on): tools held by fewer than five agents are
     // grouped, so that a rare custom tool or MCP server name cannot point to
@@ -339,11 +343,13 @@ out.capability_surface = {
     { $project: { len: { $strLenCP: { $ifNull: ["$instructions", ""] } } } },
     { $bucket: { groupBy: "$len", boundaries: [0, 1, 201, 1001, 4001, 16001],
                  default: "16001+", output: { agents: { $sum: 1 } } } },
+    { $sort: { _id: 1 } },
   ]).toArray(),
   versions: db.agents.aggregate([
     { $project: { v: { $size: { $ifNull: ["$versions", []] } } } },
     { $bucket: { groupBy: "$v", boundaries: [0, 1, 2, 3, 6, 11, 26],
                  default: "26+", output: { agents: { $sum: 1 } } } },
+    { $sort: { _id: 1 } },
   ]).toArray(),
   memory_entries: has("memoryentries") ? db.memoryentries.countDocuments() : null,
   memory_users: memoryUsers.size || null,

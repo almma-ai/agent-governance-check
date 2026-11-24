@@ -24,7 +24,7 @@ Participation is voluntary, decided by each site, and can be withdrawn at any ti
 
 Each site runs one read-only script against its own LibreChat database and receives a single file of site-wide totals; nothing is sent anywhere unless the site sends it.
 
-- **The instrument.** [scripts/agent_governance_check.js](scripts/agent_governance_check.js), version 1.2 (tag `v1.2`), about 360 lines, open source (MIT), run with `mongosh`. It makes no network calls and writes nothing to the database. Running it under a read-only database account is recommended.
+- **The instrument.** [scripts/agent_governance_check.js](scripts/agent_governance_check.js), version 1.2.1 (tag `v1.2.1`), about 360 lines, open source (MIT), run with `mongosh`. It makes no network calls and writes nothing to the database. Running it under a read-only database account is recommended.
 - **What it reads.** Agent configuration records (instruction text, enabled tools, author account ID, version history, sharing settings, creation and update times, whether a support contact is filled in); the agent each conversation used, to count conversations per agent; access-control entries for agents; the number of user accounts; and, where they exist, a fork's sharing, API-key, audit-log and memory collections, which it only counts.
 - **What it never reads.** Message content, user names, email addresses or any other profile field.
 - **How instruction text is used.** It is scanned in memory for a few English keyword patterns (for example, whether an instruction states a prohibition or an escalation step). Only yes/no tallies are kept; no text is stored or output.

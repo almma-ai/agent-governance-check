@@ -319,6 +319,12 @@ November 2026.
 
 ## Changes
 
+**1.2.1** — no change to any count. `capability_surface` lists are
+sorted deterministically: tools by agent count, then name; length and version
+buckets by lower bound. Before, tools with equal counts could appear in any
+order, and the tool at the 40th place could differ between two runs on the same
+data.
+
 **1.2** — counts only saved agents (`agent_` IDs) in new `v1_2` fields and
 reports temporary agent IDs separately; legacy fields unchanged. Tested
 against mock databases that include temporary IDs.
