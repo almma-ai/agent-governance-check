@@ -8,14 +8,24 @@ came from.
 
 | Collection | Fields kept |
 | --- | --- |
-| agents | all (instructions, tools, versions, sharing, support contact) |
+| agents | `_id`, `id`, `author`, `authorName`, `instructions`, `tools`, `mcpServerNames`, `actions`, `agent_ids`, `isShared`, `isRestricted`, `projectIds`, `createdAt`, `updatedAt`, `support_contact`, `category`, and `versions` reduced to `{updatedAt}` per version (count kept, no content): no model parameters, tool settings or resources |
 | conversations | `_id`, `agent_id`, `createdAt`, `updatedAt` only: no titles, no messages |
 | users | `_id` only |
-| aclentries, projects, sharedagents, auditlogs | all |
+| sharedagents | `_id`, `agentId`, `isPublic`, `createdAt`, `updatedAt`: no agent copies, no titles |
+| aclentries, projects, auditlogs | all |
 | agentapikeys | `_id`, `userId`, `agent_id`, `createdAt`, `lastUsedAt`: no key material |
 | memoryentries | `_id`, `userId`, `createdAt`: no memory text |
-| actions | `_id`, `agent_id`, domain and auth type: no credentials |
+| actions | `_id`, `agent_id`, `metadata.domain`, `metadata.auth.type`, `metadata.auth.authorization_type`: no credentials, no API spec |
 | messages | not copied; only the count is recorded |
+
+`actions`, `agents` and `sharedagents` are exported with a projection applied by
+MongoDB (mongosh), not `mongoexport --fields`, which does not limit
+subdocuments: it exports the whole `actions.metadata`, credentials included.
+After the restore, a field audit lists every key path in the copy (names only)
+and stops the freeze if a field-limited collection has a path outside its list,
+or if any collection has a key name that looks like a secret (`key`, `token`,
+`secret`, `auth`, ...; `author`, `authorName` and the `metadata.auth` type fields
+are allowed by exact path).
 
 Agent instructions and support contacts can contain personal information, which
 is why the archive is encrypted and never published. Only its SHA-256
